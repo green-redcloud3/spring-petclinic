@@ -1,0 +1,125 @@
+---
+apiVersion: v1
+items:
+kind: List
+metadata: {}
+items:
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: green-redcloud3-spring-petclinic
+      chart: green-redcloud3-spring-petclinic-0.0.1
+      heritage: Tiller
+      release: green-redcloud3-spring-petclinic
+    name: green-redcloud3-spring-petclinic
+    namespace: __PROJECT__
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: green-redcloud3-spring-petclinic
+    template:
+      metadata:
+        labels:
+          app: green-redcloud3-spring-petclinic
+          release: green-redcloud3-spring-petclinic
+          deploymentconfig: green-redcloud3-spring-petclinic
+          version: v1
+      spec:
+        imagePullSecrets:
+        - name: docker-registry-credentials
+        containers:
+          - name: green-redcloud3-spring-petclinic
+            image: "__IMAGE_TAG__"
+            imagePullPolicy: "Always"
+            ports:
+              - name: http
+                containerPort: 8080
+                protocol: TCP
+            livenessProbe:
+              tcpSocket:
+                port: http
+              initialDelaySeconds: 600
+              timeoutSeconds: 60
+            readinessProbe:
+              tcpSocket:
+                port: http
+            resources:
+              {}
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: green-redcloud3-spring-petclinic
+      chart: green-redcloud3-spring-petclinic-0.0.1
+      heritage: Tiller
+      release: green-redcloud3-spring-petclinic
+      version: v1
+    name: green-redcloud3-spring-petclinic
+    namespace: __PROJECT__
+  spec:
+    type: "ClusterIP"
+    ports:
+      - name: http
+        port: 80
+        protocol: TCP
+        targetPort: 8080
+    selector:
+      app: green-redcloud3-spring-petclinic
+      release: green-redcloud3-spring-petclinic
+
+- apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    annotations:
+      haproxy.router.openshift.io/timeout: 11m
+    labels:
+      app: __PROJECT__-green-redcloud3-spring-petclinic
+    name: __PROJECT__-green-redcloud3-spring-petclinic
+    namespace: istio-system
+  spec:
+    tls:
+    - hosts:
+      - "green-redcloud3-spring-petclinic.__PROJECT__.green.perspectatechdemos.com"
+      secretName: "green-perspectatechdemos-com-crt"
+    rules:
+    - host: green-redcloud3-spring-petclinic.__PROJECT__.green.perspectatechdemos.com
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: istio-ingressgateway
+            servicePort: 80
+
+- apiVersion: networking.istio.io/v1alpha3
+  kind: VirtualService
+  metadata:
+    name: green-redcloud3-spring-petclinic
+    namespace: __PROJECT__
+  spec:
+    hosts:
+    - "green-redcloud3-spring-petclinic.__PROJECT__.green.perspectatechdemos.com"
+    gateways:
+    - __PROJECT__-istio-gateway
+    http:
+    - match:
+      - uri:
+          prefix: /
+      route:
+      - destination:
+          host: green-redcloud3-spring-petclinic
+          port:
+            number: 80
+
+- apiVersion: networking.istio.io/v1alpha3
+  kind: DestinationRule
+  metadata:
+    name: green-redcloud3-spring-petclinic
+    namespace: __PROJECT__
+  spec:
+    host: green-redcloud3-spring-petclinic
+    subsets:
+    - name: v1
+      labels:
+        version: v1            
