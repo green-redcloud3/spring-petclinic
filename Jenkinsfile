@@ -88,19 +88,19 @@ spec:
     QUAY_REGISTRY_ADDRESS = "quay-quay-enterprise.apps.green.perspectatechdemos.com"
     APPLICATION_MAJOR_VERSION = "1"
     APPLICATION_MINOR_VERSION = "0"
-    DEVCLOUD_DOCKER_TAG = "${DEVCLOUD_REGISTRY_ADDRESS}/${GITHUB_PROJECT}:${APPLICATION_MAJOR_VERSION}.${APPLICATION_MINOR_VERSION}.${env.BUILD_NUMBER}"
+    DEVCLOUD_DOCKER_TAG = "${DEVCLOUD_REGISTRY_ADDRESS}/${GITHUB_PROJECT}-${BRANCH_NAME}:${APPLICATION_MAJOR_VERSION}.${APPLICATION_MINOR_VERSION}.${env.BUILD_NUMBER}"
     DEVCLOUD_BRANCH_TAG = "master"
     MATTERMOST_CHANNEL = "green-redcloud3-spring-petclinic"
-    MATTERMOST_WEBHOOK = "https://mattermost.mgt.green.perspectatechdemos.com/hooks/dwg1rrwbzbdkux3zewty8fmjrc"
+    MATTERMOST_WEBHOOK = "https://mattermost.mgt.green.perspectatechdemos.com/hooks/t5mkrsapfig9fd6xiu47uhgpoo"
     ARTIFACTORY_URL = "https://artifactory.mgt.green.perspectatechdemos.com"
     NEXUS_ARTIFACT_URL = "https://nexus.mgt.green.perspectatechdemos.com/#browse/search/docker"
     SONARQUBE_URL = "https://sonarqube.mgt.green.perspectatechdemos.com"
     // we set this for now as there is some weirdness related to BUILD_URL env variable
     // definitely not best practice
     BUILD_URL = "https://jenkins.mgt.green.perspectatechdemos.com/job/green-redcloud3/job/spring-petclinic/job/${BRANCH_NAME}/${BUILD_NUMBER}"
-    DEV_DEPLOYMENT_URL = "https://green-redcloud3-spring-petclinic.dev.green.perspectatechdemos.com"
-    TEST_DEPLOYMENT_URL = "https://green-redcloud3-spring-petclinic.test.green.perspectatechdemos.com"
-    PROD_DEPLOYMENT_URL = "https://green-redcloud3-spring-petclinic.prod.green.perspectatechdemos.com"
+    DEV_DEPLOYMENT_URL = "https://green-redcloud3-spring-petclinic-${BRANCH_NAME}.dev.green.perspectatechdemos.com"
+    TEST_DEPLOYMENT_URL = "https://green-redcloud3-spring-petclinic-${BRANCH_NAME}.test.green.perspectatechdemos.com"
+    PROD_DEPLOYMENT_URL = "https://green-redcloud3-spring-petclinic-${BRANCH_NAME}.prod.green.perspectatechdemos.com"
     REPOSITORY_SOURCE_FOLDER = "."
   }
 
@@ -141,7 +141,7 @@ spec:
         container('maven') {
           dir('.') {
             withSonarQubeEnv('sonarqube') { 
-            sh "mvn compile && mvn sonar:sonar -Dsonar.projectKey=${GITHUB_GROUP}-${GITHUB_PROJECT}"
+            sh "mvn compile && mvn sonar:sonar -Dsonar.projectKey=${GITHUB_GROUP}-${GITHUB_PROJECT}-${BRANCH_NAME} -Dsonar.projectName=${GITHUB_GROUP}-${GITHUB_PROJECT}-${BRANCH_NAME}"
             }
           }
         }
@@ -151,9 +151,10 @@ spec:
     stage('SAST Quality Gate') {
       steps {
         container('maven') {
-          timeout(time: 10, unit: 'MINUTES') {
-              waitForQualityGate abortPipeline: true
-            }
+          sh "date"
+//          timeout(time: 10, unit: 'MINUTES') {
+//              waitForQualityGate abortPipeline: true
+//            }
         }
         mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nQuality Gate: ${SONARQUBE_URL}/dashboard?id=${GITHUB_GROUP}-${GITHUB_PROJECT}"
       }
@@ -181,7 +182,8 @@ spec:
             checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'green-redcloud3-token', url: "${GITHUB_PROJECT_URL}.git"]]]
             sh "cd /usr/local/bin && wget https://redcloud3.s3.amazonaws.com/tools/oc-4.3.2-linux.tar.gz && tar -xvf oc-4.3.2-linux.tar.gz"
           dir('.') {
-            sh "sed 's#__PROJECT__#dev#g' springboot.yaml > springboot-dev.yaml"
+            sh "sed 's#__BRANCH__#${BRANCH_NAME}#g' springboot.yaml > branch-springboot-dev.yaml"
+            sh "sed 's#__PROJECT__#dev#g' branch-springboot-dev.yaml > springboot-dev.yaml"
             sh "sed -i 's#__IMAGE_TAG__#${DEVCLOUD_DOCKER_TAG}#' springboot-dev.yaml"
             sh "cat springboot-dev.yaml"
             sh "oc apply -f springboot-dev.yaml"
@@ -223,7 +225,8 @@ spec:
       steps {
         container('ubuntu') {
           dir('.') {
-            sh "sed 's#__PROJECT__#test#g' springboot.yaml > springboot-test.yaml"
+            sh "sed 's#__BRANCH__#${BRANCH_NAME}#g' springboot.yaml > branch-springboot-test.yaml"
+            sh "sed 's#__PROJECT__#test#g' branch-springboot-test.yaml > springboot-test.yaml"
             sh "sed -i 's#__IMAGE_TAG__#${DEVCLOUD_DOCKER_TAG}#' springboot-test.yaml"
             sh "cat springboot-test.yaml"
             sh "oc apply -f springboot-test.yaml"
@@ -244,7 +247,8 @@ spec:
       steps {
         container('ubuntu') {
           dir('.') {
-            sh "sed 's#__PROJECT__#prod#g' springboot.yaml > springboot-prod.yaml"
+            sh "sed 's#__BRANCH__#${BRANCH_NAME}#g' springboot.yaml > branch-springboot-prod.yaml"
+            sh "sed 's#__PROJECT__#prod#g' branch-springboot-prod.yaml > springboot-prod.yaml"
             sh "sed -i 's#__IMAGE_TAG__#${DEVCLOUD_DOCKER_TAG}#' springboot-prod.yaml"
             sh "cat springboot-prod.yaml"
             sh "oc apply -f springboot-prod.yaml"
