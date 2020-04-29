@@ -89,9 +89,10 @@ spec:
     APPLICATION_MAJOR_VERSION = "1"
     APPLICATION_MINOR_VERSION = "0"
     DEVCLOUD_DOCKER_TAG = "${DEVCLOUD_REGISTRY_ADDRESS}/${GITHUB_PROJECT}-${BRANCH_NAME}:${APPLICATION_MAJOR_VERSION}.${APPLICATION_MINOR_VERSION}.${env.BUILD_NUMBER}"
+    QUAY_DOCKER_TAG = "${QUAY_REGISTRY_ADDRESS}/${GITHUB_PROJECT}-${BRANCH_NAME}:${APPLICATION_MAJOR_VERSION}.${APPLICATION_MINOR_VERSION}.${env.BUILD_NUMBER}"
     DEVCLOUD_BRANCH_TAG = "master"
     MATTERMOST_CHANNEL = "green-redcloud3-spring-petclinic"
-    MATTERMOST_WEBHOOK = "https://mattermost.mgt.green.perspectatechdemos.com/hooks/t5mkrsapfig9fd6xiu47uhgpoo"
+    MATTERMOST_WEBHOOK = "https://mattermost.mgt.green.perspectatechdemos.com/hooks/7yocr8dr5jrsjnmm4moai7xara"
     ARTIFACTORY_URL = "https://artifactory.mgt.green.perspectatechdemos.com"
     NEXUS_ARTIFACT_URL = "https://nexus.mgt.green.perspectatechdemos.com/#browse/search/docker"
     SONARQUBE_URL = "https://sonarqube.mgt.green.perspectatechdemos.com"
@@ -165,6 +166,11 @@ spec:
           dir('.') {
             withEnv(['PATH+EXTRA=/busybox']) {
               retry(3) {
+
+              sh '''#!/busybox/sh
+              /kaniko/executor --whitelist-var-run --context `pwd` --destination ${QUAY_DOCKER_TAG}
+              '''
+
               sh '''#!/busybox/sh
               /kaniko/executor --whitelist-var-run --context `pwd` --destination ${DEVCLOUD_DOCKER_TAG}
               '''
