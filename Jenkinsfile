@@ -162,6 +162,7 @@ spec:
     }    
     stage('Package') {
       steps {
+        sh "about to do the build"
         container(name: 'kaniko', shell: '/busybox/sh') {
           dir('.') {
             withEnv(['PATH+EXTRA=/busybox']) {
@@ -169,10 +170,6 @@ spec:
 
               sh '''#!/busybox/sh
               /kaniko/executor --whitelist-var-run --context `pwd` --destination ${QUAY_DOCKER_TAG}
-              '''
-
-              sh '''#!/busybox/sh
-              /kaniko/executor --whitelist-var-run --context `pwd` --destination ${DEVCLOUD_DOCKER_TAG}
               '''
             }
           }
