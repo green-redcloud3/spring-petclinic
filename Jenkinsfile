@@ -162,7 +162,7 @@ spec:
     }    
     stage('Package') {
       steps {
-        sh "about to do the build"
+        sh "echo 'about to do the build'"
         container(name: 'kaniko', shell: '/busybox/sh') {
           dir('.') {
             withEnv(['PATH+EXTRA=/busybox']) {
