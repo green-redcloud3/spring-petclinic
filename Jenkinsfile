@@ -174,7 +174,7 @@ spec:
     }    
     stage('Package Image') {
       steps {
-        container(name: 'kaniko', shell: '/busybox/sh') {
+        container(name: 'kaniko-nexus', shell: '/busybox/sh') {
           dir('.') {
             withEnv(['PATH+EXTRA=/busybox']) {
               retry(3) {
@@ -191,7 +191,7 @@ spec:
     }
     stage('Scan Image') {
       steps {
-        container(name: 'kaniko', shell: '/busybox/sh') {
+        container(name: 'kaniko-quay', shell: '/busybox/sh') {
           dir('.') {
             withEnv(['PATH+EXTRA=/busybox']) {
               retry(3) {
