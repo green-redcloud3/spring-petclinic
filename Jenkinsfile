@@ -13,7 +13,19 @@ metadata:
 spec:
   serviceAccountName: jenkins
   containers:
-  - name: kaniko
+  - name: kaniko-nexus
+    image: gcr.io/kaniko-project/executor:debug-v0.17.1
+    imagePullPolicy: Always
+    command:
+    - /busybox/sh
+    - "-c"
+    args:
+    - /busybox/cat
+    tty: true
+    volumeMounts:
+      - name: jenkins-docker-cfg
+        mountPath: /kaniko/.docker
+  - name: kaniko-quay
     image: gcr.io/kaniko-project/executor:debug-v0.17.1
     imagePullPolicy: Always
     command:
@@ -160,7 +172,24 @@ spec:
         mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nQuality Gate: ${SONARQUBE_URL}/dashboard?id=${GITHUB_GROUP}-${GITHUB_PROJECT}"
       }
     }    
-    stage('Package') {
+    stage('Package Image') {
+      steps {
+        container(name: 'kaniko', shell: '/busybox/sh') {
+          dir('.') {
+            withEnv(['PATH+EXTRA=/busybox']) {
+              retry(3) {
+
+              sh '''#!/busybox/sh
+              /kaniko/executor --whitelist-var-run --context `pwd` --destination ${DEVCLOUD_DOCKER_TAG}
+              '''
+            }
+          }
+        }
+        }
+        mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nArtifact: ${NEXUS_ARTIFACT_URL}"
+      }
+    }
+    stage('Scan Image') {
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
           dir('.') {
@@ -169,10 +198,6 @@ spec:
 
               sh '''#!/busybox/sh
               /kaniko/executor --whitelist-var-run --context `pwd` --destination ${QUAY_DOCKER_TAG}
-              '''
-
-              sh '''#!/busybox/sh
-              /kaniko/executor --whitelist-var-run --context `pwd` --destination ${DEVCLOUD_DOCKER_TAG}
               '''
             }
           }
