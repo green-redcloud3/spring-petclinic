@@ -121,7 +121,7 @@ spec:
 
   // triggers { pollSCM '* * * * *' }
   options {
-    disableConcurrentBuilds()
+    // disableConcurrentBuilds()
     skipDefaultCheckout()
   }
 
