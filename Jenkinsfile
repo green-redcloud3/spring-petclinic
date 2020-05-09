@@ -148,7 +148,7 @@ spec:
             sh 'mvn test'
           }
         }
-        mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}"
+        // mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}"
       }
     }
     stage('SAST') {
@@ -171,7 +171,7 @@ spec:
 //              waitForQualityGate abortPipeline: true
 //            }
         }
-        mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nQuality Gate: ${SONARQUBE_URL}/dashboard?id=${GITHUB_GROUP}-${GITHUB_PROJECT}"
+        // mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nQuality Gate: ${SONARQUBE_URL}/dashboard?id=${GITHUB_GROUP}-${GITHUB_PROJECT}"
       }
     }    
     stage('Package Image') {
@@ -182,7 +182,7 @@ spec:
               retry(3) {
 
               sh '''#!/busybox/sh
-              /kaniko/executor --whitelist-var-run --cleanup --context `pwd` --destination ${DEVCLOUD_DOCKER_TAG}
+              /kaniko/executor --whitelist-var-run --context `pwd` --destination ${DEVCLOUD_DOCKER_TAG}
               '''
             }
           }
@@ -199,13 +199,13 @@ spec:
               retry(3) {
 
               sh '''#!/busybox/sh
-              /kaniko/executor --whitelist-var-run --cleanup --context `pwd` --destination ${QUAY_DOCKER_TAG}
+              /kaniko/executor --whitelist-var-run --context `pwd` --destination ${QUAY_DOCKER_TAG}
               '''
             }
           }
         }
         }
-        mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nArtifact: ${NEXUS_ARTIFACT_URL}"
+        // mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nArtifact: ${NEXUS_ARTIFACT_URL}"
       }
     }
     stage('Deploy Dev') {
@@ -230,7 +230,7 @@ spec:
         container('maven') {
           sh "echo 'selenium script validation'"
         }
-        mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nDevelopment URL: ${DEV_DEPLOYMENT_URL}"
+        // mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nDevelopment URL: ${DEV_DEPLOYMENT_URL}"
       }
     }
     stage('ZAP Scan Dev') {
@@ -251,7 +251,7 @@ spec:
           archiveArtifacts(artifacts: 'zap_scan_dev.xml')
           archiveArtifacts(artifacts: 'zap_scan_dev.html')
         }
-        mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nZAP Scan Dev: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nDevelopment URL: ${DEV_DEPLOYMENT_URL}"
+        // mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nZAP Scan Dev: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nDevelopment URL: ${DEV_DEPLOYMENT_URL}"
       }
     }    
     stage('Deploy Test') {
@@ -273,7 +273,7 @@ spec:
         container('maven') {
           sh "echo 'selenium script validation'"
         }
-        mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nTest URL: ${TEST_DEPLOYMENT_URL}"
+        // mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nTest URL: ${TEST_DEPLOYMENT_URL}"
       }
     }
     stage('Deploy Prod') {
@@ -287,7 +287,7 @@ spec:
             sh "oc apply -f springboot-prod.yaml"
           }
         }
-        mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nProduction URL: ${PROD_DEPLOYMENT_URL}"
+        // mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nProduction URL: ${PROD_DEPLOYMENT_URL}"
       }
     }
     stage('Validate Prod') {
@@ -295,7 +295,7 @@ spec:
         container('maven') {
           sh "echo 'selenium script validation'"
         }
-        mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nProduction URL: ${PROD_DEPLOYMENT_URL}"
+        // mattermostSend channel: "${MATTERMOST_CHANNEL}", endpoint: "${MATTERMOST_WEBHOOK}", message: "Job: ${JOB_NAME} \nStage: ${STAGE_NAME}\nBuild: ${BUILD_URL}\nCommit: ${GITHUB_PROJECT_URL}\nProduction URL: ${PROD_DEPLOYMENT_URL}"
       }
     }       
 
