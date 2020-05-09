@@ -14,8 +14,9 @@ spec:
   serviceAccountName: jenkins
   containers:
   - name: kaniko-nexus
-    image: gcr.io/kaniko-project/executor:debug-v0.17.1
-    imagePullPolicy: Always
+    # image: gcr.io/kaniko-project/executor:debug-v0.17.1
+    image: gcr.io/kaniko-project/executor:debug-v0.22.0
+    imagePullPolicy: IfNotPresent
     command:
     - /busybox/sh
     - "-c"
@@ -26,8 +27,9 @@ spec:
       - name: jenkins-docker-cfg
         mountPath: /kaniko/.docker
   - name: kaniko-quay
-    image: gcr.io/kaniko-project/executor:debug-v0.17.1
-    imagePullPolicy: Always
+    # image: gcr.io/kaniko-project/executor:debug-v0.17.1
+    image: gcr.io/kaniko-project/executor:debug-v0.22.0
+    imagePullPolicy: IfNotPresent
     command:
     - /busybox/sh
     - "-c"
@@ -180,7 +182,7 @@ spec:
               retry(3) {
 
               sh '''#!/busybox/sh
-              /kaniko/executor --whitelist-var-run --context `pwd` --destination ${DEVCLOUD_DOCKER_TAG}
+              /kaniko/executor --whitelist-var-run --cleanup --context `pwd` --destination ${DEVCLOUD_DOCKER_TAG}
               '''
             }
           }
@@ -197,7 +199,7 @@ spec:
               retry(3) {
 
               sh '''#!/busybox/sh
-              /kaniko/executor --whitelist-var-run --context `pwd` --destination ${QUAY_DOCKER_TAG}
+              /kaniko/executor --whitelist-var-run --cleanup --context `pwd` --destination ${QUAY_DOCKER_TAG}
               '''
             }
           }
