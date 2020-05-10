@@ -106,7 +106,7 @@ spec:
     QUAY_DOCKER_TAG = "${QUAY_REGISTRY_ADDRESS}/quay/${GITHUB_PROJECT}-${BRANCH_NAME}:${APPLICATION_MAJOR_VERSION}.${APPLICATION_MINOR_VERSION}.${env.BUILD_NUMBER}"
     DEVCLOUD_BRANCH_TAG = "master"
     MATTERMOST_CHANNEL = "green-redcloud3-spring-petclinic"
-    MATTERMOST_WEBHOOK = "https://mattermost.mgt.green.perspectatechdemos.com/hooks/58zdy6xcqbb8iq4kpjb6ox5x4a"
+    MATTERMOST_WEBHOOK = "https://mattermost.mgt.green.perspectatechdemos.com/hooks/87uyqes777fo3b85k5jshfauqa"
     ARTIFACTORY_URL = "https://artifactory.mgt.green.perspectatechdemos.com"
     NEXUS_ARTIFACT_URL = "https://nexus.mgt.green.perspectatechdemos.com/#browse/search/docker"
     SONARQUBE_URL = "https://sonarqube.mgt.green.perspectatechdemos.com"
